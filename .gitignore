@@ -1,0 +1,9 @@
+node_modules/
+
+*.tsbuildinfo
+.env
+out/
+.cache/
+npm-debug.log*
+coverage/
+*.js.map
