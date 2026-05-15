@@ -2,14 +2,16 @@ export { diffSchemas } from './diff';
 export { generateReport, formatDiff } from './report';
 export { generateMigrations, applyMigrations, hasBreakingChanges } from './migrate';
 export { validateSchema, validateDiffSchemas } from './validate';
-export { formatOutput } from './format';
-export { applyPatch, revertPatch } from './patch';
+export { formatOutput, formatAsText, formatAsMarkdown, formatAsJson } from './format';
+export { applyPatch, applyDiff, revertPatch } from './patch';
+export { summarizeDiff, formatSummary } from './summary';
+export { buildChangelogEntry, formatChangelog } from './changelog';
+export type { Changelog, ChangelogEntry } from './changelog';
 export type {
-  JSONSchema,
   SchemaDiff,
+  ChangeType,
   MigrationStep,
-  ValidationResult,
-  PatchResult,
-  OutputFormat,
-  DiffType,
+  SchemaDefinition,
+  DiffOptions,
+  ReportOptions,
 } from './types';
