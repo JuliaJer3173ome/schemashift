@@ -23,6 +23,11 @@ describe('isBreakingChange', () => {
     const diff: SchemaDiff = { type: 'added', path: 'properties.age', value: { type: 'number' } };
     expect(isBreakingChange(diff)).toBe(false);
   });
+
+  it('does not mark changed as breaking', () => {
+    const diff: SchemaDiff = { type: 'changed', path: 'description', oldValue: 'old', value: 'new' };
+    expect(isBreakingChange(diff)).toBe(false);
+  });
 });
 
 describe('diffToMigrationStep', () => {
@@ -46,6 +51,18 @@ describe('diffToMigrationStep', () => {
     expect(step.operation).toBe('replace');
     expect(step.value).toBe('new');
   });
+
+  it('preserves path on all step types', () => {
+    const path = 'properties.foo';
+    const diffs: SchemaDiff[] = [
+      { type: 'added', path, value: 1 },
+      { type: 'removed', path },
+      { type: 'changed', path, oldValue: 'a', value: 'b' },
+    ];
+    for (const diff of diffs) {
+      expect(diffToMigrationStep(diff).path).toBe(path);
+    }
+  });
 });
 
 describe('hasBreakingChanges', () => {
@@ -60,6 +77,10 @@ describe('hasBreakingChanges', () => {
   it('returns false when no breaking changes', () => {
     const diffs: SchemaDiff[] = [{ type: 'added', path: 'properties.x' }];
     expect(hasBreakingChanges(diffs)).toBe(false);
+  });
+
+  it('returns false for an empty diff list', () => {
+    expect(hasBreakingChanges([])).toBe(false);
   });
 });
 
