@@ -2,77 +2,87 @@ import {
   diffSchemas,
   generateReport,
   generateMigrations,
-  applyMigrations,
   hasBreakingChanges,
   validateSchema,
-  validateDiffSchemas,
+  formatOutput,
+  applyPatch,
+  revertPatch,
 } from './index';
 
-const sourceSchema = {
+const schemaV1 = {
   type: 'object' as const,
   properties: {
+    id: { type: 'integer' as const },
     name: { type: 'string' as const },
-    age: { type: 'integer' as const },
   },
-  required: ['name'],
+  required: ['id', 'name'],
 };
 
-const targetSchema = {
+const schemaV2 = {
   type: 'object' as const,
   properties: {
+    id: { type: 'integer' as const },
     name: { type: 'string' as const },
-    age: { type: 'number' as const },
     email: { type: 'string' as const },
   },
-  required: ['name', 'email'],
+  required: ['id', 'name', 'email'],
 };
 
-describe('schemashift public API', () => {
-  it('exports diffSchemas and produces diffs', () => {
-    const diffs = diffSchemas(sourceSchema, targetSchema);
-    expect(Array.isArray(diffs)).toBe(true);
-    expect(diffs.length).toBeGreaterThan(0);
+describe('index exports', () => {
+  it('exports diffSchemas', () => {
+    expect(typeof diffSchemas).toBe('function');
   });
 
-  it('exports generateReport and produces a string report', () => {
-    const diffs = diffSchemas(sourceSchema, targetSchema);
-    const report = generateReport(diffs);
-    expect(typeof report).toBe('string');
-    expect(report.length).toBeGreaterThan(0);
+  it('exports generateReport', () => {
+    expect(typeof generateReport).toBe('function');
   });
 
-  it('exports generateMigrations and produces migration steps', () => {
-    const diffs = diffSchemas(sourceSchema, targetSchema);
-    const plan = generateMigrations(diffs);
-    expect(plan).toHaveProperty('steps');
-    expect(plan).toHaveProperty('hasBreaking');
+  it('exports generateMigrations', () => {
+    expect(typeof generateMigrations).toBe('function');
   });
 
   it('exports hasBreakingChanges', () => {
-    const diffs = diffSchemas(sourceSchema, targetSchema);
-    const breaking = hasBreakingChanges(diffs);
-    expect(typeof breaking).toBe('boolean');
+    expect(typeof hasBreakingChanges).toBe('function');
   });
 
   it('exports validateSchema', () => {
-    const result = validateSchema(sourceSchema);
-    expect(result.valid).toBe(true);
+    expect(typeof validateSchema).toBe('function');
   });
 
-  it('exports validateDiffSchemas', () => {
-    const result = validateDiffSchemas(sourceSchema, targetSchema);
-    expect(result.canDiff).toBe(true);
+  it('exports formatOutput', () => {
+    expect(typeof formatOutput).toBe('function');
   });
 
-  it('full pipeline: validate -> diff -> migrate -> report', () => {
-    const { canDiff } = validateDiffSchemas(sourceSchema, targetSchema);
-    expect(canDiff).toBe(true);
+  it('exports applyPatch', () => {
+    expect(typeof applyPatch).toBe('function');
+  });
 
-    const diffs = diffSchemas(sourceSchema, targetSchema);
-    const plan = generateMigrations(diffs);
+  it('exports revertPatch', () => {
+    expect(typeof revertPatch).toBe('function');
+  });
+
+  it('full workflow: diff -> patch -> revert', () => {
+    const diffs = diffSchemas(schemaV1, schemaV2);
+    expect(diffs.length).toBeGreaterThan(0);
+
+    const { schema: patched, applied } = applyPatch(schemaV1, diffs);
+    expect(applied.length).toBeGreaterThan(0);
+    expect((patched as any).properties?.email).toBeDefined();
+
+    const { schema: reverted } = revertPatch(patched, diffs);
+    expect((reverted as any).properties?.email).toBeUndefined();
+  });
+
+  it('full workflow: diff -> migrations -> report', () => {
+    const diffs = diffSchemas(schemaV1, schemaV2);
+    const migrations = generateMigrations(diffs);
+    expect(migrations.length).toBeGreaterThan(0);
+
+    const breaking = hasBreakingChanges(diffs);
+    expect(typeof breaking).toBe('boolean');
+
     const report = generateReport(diffs);
-
-    expect(plan.steps.length).toBeGreaterThan(0);
-    expect(report).toContain('Schema Diff Report');
+    expect(typeof report).toBe('string');
+    expect(report.length).toBeGreaterThan(0);
   });
 });

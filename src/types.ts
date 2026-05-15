@@ -1,4 +1,4 @@
-export type JsonSchemaType =
+export type JSONSchemaType =
   | 'string'
   | 'number'
   | 'integer'
@@ -7,51 +7,57 @@ export type JsonSchemaType =
   | 'array'
   | 'null';
 
-export interface JsonSchema {
-  type?: JsonSchemaType | JsonSchemaType[];
-  properties?: Record<string, JsonSchema>;
+export interface JSONSchema {
+  type?: JSONSchemaType | JSONSchemaType[];
+  properties?: Record<string, JSONSchema>;
   required?: string[];
-  items?: JsonSchema;
+  items?: JSONSchema;
+  additionalProperties?: boolean | JSONSchema;
   enum?: unknown[];
   const?: unknown;
-  description?: string;
+  allOf?: JSONSchema[];
+  anyOf?: JSONSchema[];
+  oneOf?: JSONSchema[];
+  not?: JSONSchema;
   title?: string;
+  description?: string;
   default?: unknown;
+  format?: string;
   minimum?: number;
   maximum?: number;
   minLength?: number;
   maxLength?: number;
   pattern?: string;
-  additionalProperties?: boolean | JsonSchema;
-  $ref?: string;
-  allOf?: JsonSchema[];
-  anyOf?: JsonSchema[];
-  oneOf?: JsonSchema[];
-  not?: JsonSchema;
   [key: string]: unknown;
 }
 
-export type DiffType = 'added' | 'removed' | 'changed' | 'type_changed';
+export type DiffType = 'added' | 'removed' | 'changed';
 
 export interface SchemaDiff {
-  type: DiffType;
   path: string;
-  value?: unknown;
-  oldValue?: unknown;
-  description?: string;
+  type: DiffType;
+  from: unknown;
+  to: unknown;
 }
 
 export interface MigrationStep {
-  operation: 'add' | 'remove' | 'replace' | 'rename';
   path: string;
-  value?: unknown;
-  fromPath?: string;
+  action: 'add' | 'remove' | 'update';
+  breaking: boolean;
   description: string;
+  before?: unknown;
+  after?: unknown;
 }
 
-export interface SchemaShiftResult {
-  diffs: SchemaDiff[];
-  migrations: MigrationStep[];
-  report: string;
-  hasBreakingChanges: boolean;
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
 }
+
+export interface PatchResult {
+  schema: JSONSchema;
+  applied: string[];
+  skipped: string[];
+}
+
+export type OutputFormat = 'text' | 'markdown' | 'json';
