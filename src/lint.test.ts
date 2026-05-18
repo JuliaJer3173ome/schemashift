@@ -83,6 +83,10 @@ describe('lintDiff', () => {
     ];
     expect(lintDiff(diffs)).toHaveLength(0);
   });
+
+  it('returns empty array for empty diff list', () => {
+    expect(lintDiff([])).toHaveLength(0);
+  });
 });
 
 describe('formatLintReport', () => {
@@ -91,10 +95,10 @@ describe('formatLintReport', () => {
     expect(formatLintReport(report)).toContain('✅');
   });
 
-  it('returns failure message with details', () => {
-    const report = lintSchema({} as JSONSchema);
-    const output = formatLintReport(report);
-    expect(output).toContain('❌');
-    expect(output).toContain('require-type');
+  it('returns failure message with rule ids when not passed', () => {
+    const report = lintSchema(minimalSchema);
+    const formatted = formatLintReport(report);
+    expect(formatted).toContain('❌');
+    expect(formatted).toContain('require-description');
   });
 });
