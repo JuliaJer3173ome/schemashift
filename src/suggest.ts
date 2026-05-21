@@ -73,3 +73,19 @@ export function formatSuggestions(report: SuggestionReport): string {
   });
   return lines.join('\n');
 }
+
+/**
+ * Filters a suggestion report down to only suggestions matching the given severity levels.
+ * Returns a new report with updated totals and hasCritical flag.
+ */
+export function filterBySeverity(
+  report: SuggestionReport,
+  severities: Array<Suggestion['severity']>,
+): SuggestionReport {
+  const filtered = report.suggestions.filter((s) => severities.includes(s.severity));
+  return {
+    suggestions: filtered,
+    total: filtered.length,
+    hasCritical: filtered.some((s) => s.severity === 'error'),
+  };
+}
