@@ -42,26 +42,27 @@ describe('resolve + diff integration', () => {
     required: ['name'],
   };
 
+  /** Resolve both schema versions and return their diffs as a convenience helper. */
+  function resolveAndDiff(a: JSONSchema, b: JSONSchema) {
+    const { schema: resolved1 } = resolveSchema(a);
+    const { schema: resolved2 } = resolveSchema(b);
+    return diffSchemas(resolved1, resolved2);
+  }
+
   it('diffs resolved schemas and detects added zip property', () => {
-    const { schema: resolved1 } = resolveSchema(v1);
-    const { schema: resolved2 } = resolveSchema(v2);
-    const diffs = diffSchemas(resolved1, resolved2);
+    const diffs = resolveAndDiff(v1, v2);
     const paths = diffs.map(d => d.path);
     expect(paths.some(p => p.includes('zip'))).toBe(true);
   });
 
   it('detects breaking required change after resolution', () => {
-    const { schema: resolved1 } = resolveSchema(v1);
-    const { schema: resolved2 } = resolveSchema(v2);
-    const diffs = diffSchemas(resolved1, resolved2);
+    const diffs = resolveAndDiff(v1, v2);
     const added = diffs.filter(d => d.type === 'added');
     expect(added.length).toBeGreaterThan(0);
   });
 
   it('produces no diffs for identical resolved schemas', () => {
-    const { schema: resolved1 } = resolveSchema(v1);
-    const { schema: resolved2 } = resolveSchema(v1);
-    const diffs = diffSchemas(resolved1, resolved2);
+    const diffs = resolveAndDiff(v1, v1);
     expect(diffs).toHaveLength(0);
   });
 });
