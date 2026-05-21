@@ -61,6 +61,20 @@ export function clearHistory(history: SchemaHistory): void {
   history.entries = [];
 }
 
+/**
+ * Removes a single history entry by id.
+ * Returns true if the entry was found and removed, false otherwise.
+ */
+export function removeHistoryEntry(
+  history: SchemaHistory,
+  id: string
+): boolean {
+  const index = history.entries.findIndex((e) => e.id === id);
+  if (index === -1) return false;
+  history.entries.splice(index, 1);
+  return true;
+}
+
 export function formatHistorySummary(history: SchemaHistory): string {
   if (history.entries.length === 0) {
     return 'No history entries.';
