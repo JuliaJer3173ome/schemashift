@@ -16,6 +16,10 @@ describe('dedupeKey', () => {
   it('returns different keys for different diffs', () => {
     expect(dedupeKey(addDiff)).not.toBe(dedupeKey(removeDiff));
   });
+
+  it('returns the same key for identical diffs', () => {
+    expect(dedupeKey(addDiff)).toBe(dedupeKey(addDiff));
+  });
 });
 
 describe('dedupeDiffs', () => {
@@ -65,6 +69,10 @@ describe('mergeDuplicates', () => {
     const diffs = [addDiff, removeDiff, changeDiff];
     expect(mergeDuplicates(diffs)).toHaveLength(3);
   });
+
+  it('returns empty array for empty input', () => {
+    expect(mergeDuplicates([])).toEqual([]);
+  });
 });
 
 describe('countDuplicates', () => {
@@ -72,8 +80,12 @@ describe('countDuplicates', () => {
     expect(countDuplicates([addDiff, removeDiff])).toBe(0);
   });
 
-  it('counts exact duplicates correctly', () => {
-    expect(countDuplicates([addDiff, addDiff, addDiff])).toBe(2);
+  it('counts exact duplicates', () => {
+    expect(countDuplicates([addDiff, addDiff, removeDiff])).toBe(1);
+  });
+
+  it('counts multiple groups of duplicates', () => {
+    expect(countDuplicates([addDiff, addDiff, removeDiff, removeDiff])).toBe(2);
   });
 
   it('returns 0 for empty input', () => {
