@@ -22,6 +22,17 @@ export type RedactOptions = {
 };
 
 /**
+ * Builds a Set of sensitive keys by merging the defaults with any user-supplied keys.
+ * All keys are normalized to lowercase for case-insensitive matching.
+ */
+function buildSensitiveSet(extraKeys: string[] = []): Set<string> {
+  return new Set([
+    ...DEFAULT_SENSITIVE_KEYS,
+    ...extraKeys.map((k) => k.toLowerCase()),
+  ]);
+}
+
+/**
  * Redacts sensitive field descriptions and examples from a JSON Schema.
  */
 export function redactSchema(
@@ -34,10 +45,7 @@ export function redactSchema(
     redactExamples = true,
   } = options;
 
-  const sensitiveSet = new Set([
-    ...DEFAULT_SENSITIVE_KEYS,
-    ...sensitiveKeys.map((k) => k.toLowerCase()),
-  ]);
+  const sensitiveSet = buildSensitiveSet(sensitiveKeys);
 
   function redactNode(node: JSONSchema, key?: string): JSONSchema {
     if (typeof node !== 'object' || node === null) return node;
@@ -79,10 +87,7 @@ export function redactDiffs(
   options: RedactOptions = {}
 ): SchemaDiff[] {
   const { sensitiveKeys = [], replacement = '[REDACTED]' } = options;
-  const sensitiveSet = new Set([
-    ...DEFAULT_SENSITIVE_KEYS,
-    ...sensitiveKeys.map((k) => k.toLowerCase()),
-  ]);
+  const sensitiveSet = buildSensitiveSet(sensitiveKeys);
 
   return diffs.map((diff) => {
     const pathParts = diff.path.split('.');
