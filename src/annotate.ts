@@ -64,3 +64,12 @@ export function formatAnnotations(annotations: Annotation[]): string {
     .map(a => `[${a.kind.toUpperCase()}] ${a.path}: ${a.message}`)
     .join('\n');
 }
+
+/**
+ * Filters annotations by one or more severity kinds.
+ * Useful for surfacing only breaking changes or warnings during CI checks.
+ */
+export function filterAnnotations(annotations: Annotation[], ...kinds: Annotation['kind'][]): Annotation[] {
+  const kindSet = new Set(kinds);
+  return annotations.filter(a => kindSet.has(a.kind));
+}
