@@ -46,6 +46,14 @@ export function hasBreakingChanges(diffs: SchemaDiff[]): boolean {
   return diffs.some(isBreakingChange);
 }
 
+/**
+ * Returns only the breaking changes from a list of diffs.
+ * Useful for reporting or gating deployments on destructive schema changes.
+ */
+export function getBreakingChanges(diffs: SchemaDiff[]): SchemaDiff[] {
+  return diffs.filter(isBreakingChange);
+}
+
 export function applyMigrations(
   schema: Record<string, unknown>,
   steps: MigrationStep[]
